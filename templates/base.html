@@ -14,11 +14,36 @@
         MoneyFlow
       {% endblock %}
     </title>
+    <script>
+      function getPreferredTheme() {
+        var saved = localStorage.getItem('theme');
+        if (saved) return saved;
+        return (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        if (document.body) document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        var icon = document.getElementById('theme-icon');
+        if (icon) icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+        var metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) metaTheme.setAttribute('content', theme === 'dark' ? '#0f0f1a' : '#f1f5f9');
+      }
+
+      function toggleTheme() {
+        var current = document.documentElement.getAttribute('data-theme') || 'dark';
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+      }
+
+      // Run immediately
+      applyTheme(getPreferredTheme());
+    </script>
     {% progressive_web_app_meta %}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="{% static 'main/css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'main/css/style.css' %}?v=5.0" />
   </head>
   <body>
     <!-- Messages -->
@@ -45,17 +70,21 @@
 
     <!-- Page Content -->
     <main class="main-content">
-      {% if user.is_authenticated %}
-        <div style="display: flex; justify-content: flex-end; margin-bottom: var(--space-md);">
-          <form method="post" action="{% url 'logout' %}">
+      <div class="top-bar">
+        <button id="theme-toggle" class="theme-toggle-btn" type="button" onclick="toggleTheme()" title="Toggle Light/Dark Theme" aria-label="Toggle theme">
+          <span id="theme-icon">🌙</span>
+        </button>
+        {% if user.is_authenticated %}
+          <form method="post" action="{% url 'logout' %}" style="display:inline;">
             {% csrf_token %}
             <button type="submit" class="btn btn-ghost btn-sm">Log out</button>
           </form>
-        </div>
-      {% endif %}
+        {% endif %}
+      </div>
       {% block content %}
       {% endblock %}
     </main>
+
 
     <!-- Bottom Navigation -->
     <nav class="bottom-nav" id="bottom-nav">
@@ -95,9 +124,17 @@
           container.style.transform = 'translateY(-20px)'
           setTimeout(() => container.remove(), 300)
         }
-      }, 3000)
+      }, 3000);
+
+      // Sync icon on DOM load
+      document.addEventListener('DOMContentLoaded', function() {
+        applyTheme(getPreferredTheme());
+      });
     </script>
     {% block extra_js %}
     {% endblock %}
+
+
+
   </body>
 </html>
