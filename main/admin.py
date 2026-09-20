@@ -1,5 +1,26 @@
 from django.contrib import admin
-from .models import Wallet, Income, Expense, Lending, Borrowing
+from .models import (
+    Wallet,
+    IncomeSource,
+    ExpenseCategory,
+    Income,
+    Expense,
+    Lending,
+    Borrowing,
+    Transfer,
+)
+
+
+@admin.register(IncomeSource)
+class IncomeSourceAdmin(admin.ModelAdmin):
+    list_display = ['name', 'icon', 'created_at']
+    search_fields = ['name']
+
+
+@admin.register(ExpenseCategory)
+class ExpenseCategoryAdmin(admin.ModelAdmin):
+    list_display = ['name', 'icon', 'created_at']
+    search_fields = ['name']
 
 
 @admin.register(Wallet)
@@ -19,6 +40,7 @@ class ExpenseAdmin(admin.ModelAdmin):
     list_filter = ['category', 'date']
 
 
+
 @admin.register(Lending)
 class LendingAdmin(admin.ModelAdmin):
     list_display = ['person_name', 'amount', 'date_lent', 'return_date', 'is_returned']
@@ -29,3 +51,10 @@ class LendingAdmin(admin.ModelAdmin):
 class BorrowingAdmin(admin.ModelAdmin):
     list_display = ['person_name', 'amount', 'date_borrowed', 'return_date', 'is_returned']
     list_filter = ['is_returned']
+
+
+@admin.register(Transfer)
+class TransferAdmin(admin.ModelAdmin):
+    list_display = ['from_wallet', 'to_wallet', 'amount', 'date', 'description', 'created_at']
+    list_filter = ['date', 'from_wallet', 'to_wallet']
+

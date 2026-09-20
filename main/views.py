@@ -1,12 +1,13 @@
 from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.db import transaction
 from django.db.models import Sum, Q
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 
-from .models import Wallet, Income, Expense, Lending, Borrowing
-from .forms import WalletForm, IncomeForm, ExpenseForm, LendingForm, BorrowingForm
+from .models import Wallet, Income, Expense, Lending, Borrowing, Transfer
+from .forms import WalletForm, IncomeForm, ExpenseForm, LendingForm, BorrowingForm, TransferForm
 
 
 # ── Dashboard ──────────────────────────────────────────────────────────
@@ -59,15 +60,15 @@ def dashboard(request):
     ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
 
     # Recent transactions — last 10 combined
-    recent_incomes = list(Income.objects.filter(wallet__user=request.user).select_related('wallet')[:5])
-    recent_expenses = list(Expense.objects.filter(wallet__user=request.user).select_related('wallet')[:5])
+    recent_incomes = list(Income.objects.filter(wallet__user=request.user).select_related('wallet', 'source')[:5])
+    recent_expenses = list(Expense.objects.filter(wallet__user=request.user).select_related('wallet', 'category')[:5])
 
     recent_items = []
     for inc in recent_incomes:
         recent_items.append({
             'type': 'income',
-            'icon': '📥',
-            'label': inc.get_source_display(),
+            'icon': inc.source.icon if inc.source and inc.source.icon else '📥',
+            'label': inc.source.name if inc.source else 'Income',
             'amount': inc.amount,
             'date': inc.date,
             'wallet': str(inc.wallet),
@@ -76,8 +77,8 @@ def dashboard(request):
     for exp in recent_expenses:
         recent_items.append({
             'type': 'expense',
-            'icon': '📤',
-            'label': exp.get_category_display(),
+            'icon': exp.category.icon if exp.category and exp.category.icon else '📤',
+            'label': exp.category.name if exp.category else 'Expense',
             'amount': exp.amount,
             'date': exp.date,
             'wallet': str(exp.wallet),
@@ -171,7 +172,7 @@ def wallet_delete(request, pk):
 
 @login_required
 def income_list(request):
-    incomes = Income.objects.filter(wallet__user=request.user).select_related('wallet')
+    incomes = Income.objects.filter(wallet__user=request.user).select_related('wallet', 'source')
 
     # Month filter
     month = request.GET.get('month')
@@ -230,7 +231,7 @@ def income_delete(request, pk):
 
 @login_required
 def expense_list(request):
-    expenses = Expense.objects.filter(wallet__user=request.user).select_related('wallet')
+    expenses = Expense.objects.filter(wallet__user=request.user).select_related('wallet', 'category')
 
     month = request.GET.get('month')
     year = request.GET.get('year')
@@ -408,3 +409,83 @@ def borrowing_delete(request, pk):
         'cancel_url': 'borrowing_list',
         'title': 'Delete Borrowing',
     })
+
+
+# ── Transfers ──────────────────────────────────────────────────────────
+
+@login_required
+def transfer_list(request):
+    transfers = Transfer.objects.filter(user=request.user).select_related('from_wallet', 'to_wallet')
+
+    # Month filter
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+    if month and year:
+        transfers = transfers.filter(date__month=int(month), date__year=int(year))
+
+    total = transfers.aggregate(total=Sum('amount'))['total'] or Decimal('0')
+
+    return render(request, 'transfer_list.html', {
+        'transfers': transfers,
+        'total': total,
+    })
+
+
+@login_required
+def transfer_create(request):
+    user_wallets = Wallet.objects.filter(user=request.user)
+    form = TransferForm()
+    form.fields['from_wallet'].queryset = user_wallets
+    form.fields['to_wallet'].queryset = user_wallets
+
+    if request.method == 'POST':
+        form = TransferForm(request.POST)
+        form.fields['from_wallet'].queryset = user_wallets
+        form.fields['to_wallet'].queryset = user_wallets
+        if form.is_valid():
+            with transaction.atomic():
+                transfer = form.save(commit=False)
+                transfer.user = request.user
+
+                from_w = Wallet.objects.select_for_update().get(pk=transfer.from_wallet.pk)
+                to_w = Wallet.objects.select_for_update().get(pk=transfer.to_wallet.pk)
+
+                if from_w.balance < transfer.amount:
+                    messages.error(request, f"Insufficient balance in {from_w.name}.")
+                    return render(request, 'transfer_form.html', {'form': form, 'title': 'Transfer Money'})
+
+                from_w.balance -= transfer.amount
+                to_w.balance += transfer.amount
+                from_w.save()
+                to_w.save()
+                transfer.save()
+
+            messages.success(request, f'Transferred ৳{transfer.amount} from {from_w.name} to {to_w.name}!')
+            return redirect('transfer_list')
+
+    return render(request, 'transfer_form.html', {
+        'form': form,
+        'title': 'Transfer Money',
+    })
+
+
+@login_required
+def transfer_delete(request, pk):
+    transfer = get_object_or_404(Transfer, pk=pk, user=request.user)
+    if request.method == 'POST':
+        with transaction.atomic():
+            from_w = Wallet.objects.select_for_update().get(pk=transfer.from_wallet.pk)
+            to_w = Wallet.objects.select_for_update().get(pk=transfer.to_wallet.pk)
+            from_w.balance += transfer.amount
+            to_w.balance -= transfer.amount
+            from_w.save()
+            to_w.save()
+            transfer.delete()
+        messages.success(request, 'Transfer record deleted and balances reverted!')
+        return redirect('transfer_list')
+    return render(request, 'confirm_delete.html', {
+        'object': transfer,
+        'cancel_url': 'transfer_list',
+        'title': 'Delete Transfer',
+    })
+

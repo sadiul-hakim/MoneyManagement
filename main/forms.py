@@ -1,5 +1,14 @@
 from django import forms
-from .models import Wallet, Income, Expense, Lending, Borrowing
+from .models import (
+    Wallet,
+    IncomeSource,
+    ExpenseCategory,
+    Income,
+    Expense,
+    Lending,
+    Borrowing,
+    Transfer,
+)
 
 
 class WalletForm(forms.ModelForm):
@@ -144,3 +153,49 @@ class BorrowingForm(forms.ModelForm):
                 'class': 'form-input',
             }),
         }
+
+
+class TransferForm(forms.ModelForm):
+    class Meta:
+        model = Transfer
+        fields = ['from_wallet', 'to_wallet', 'amount', 'date', 'description']
+        widgets = {
+            'from_wallet': forms.Select(attrs={
+                'class': 'form-input',
+            }),
+            'to_wallet': forms.Select(attrs={
+                'class': 'form-input',
+            }),
+            'amount': forms.NumberInput(attrs={
+                'placeholder': 'Amount to transfer',
+                'class': 'form-input',
+                'step': '0.01',
+                'inputmode': 'decimal',
+            }),
+            'date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-input',
+            }),
+            'description': forms.TextInput(attrs={
+                'placeholder': 'Note (optional)',
+                'class': 'form-input',
+            }),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        from_wallet = cleaned_data.get('from_wallet')
+        to_wallet = cleaned_data.get('to_wallet')
+        amount = cleaned_data.get('amount')
+
+        if from_wallet and to_wallet and from_wallet == to_wallet:
+            self.add_error('to_wallet', 'Destination wallet cannot be the same as source wallet.')
+
+        if amount is not None and amount <= 0:
+            self.add_error('amount', 'Transfer amount must be greater than 0.')
+
+        if from_wallet and amount and from_wallet.balance < amount:
+            self.add_error('amount', f'Insufficient balance in {from_wallet.name} (Available: ৳{from_wallet.balance}).')
+
+        return cleaned_data
+

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Transfers — MoneyFlow{% endblock %}
+
+{% block content %}
+<div class="page-header flex-between" style="align-items: center;">
+    <div>
+        <h1 class="page-title">🔄 Transfers</h1>
+        <div class="page-subtitle">Wallet to wallet history</div>
+    </div>
+    <div>
+        <a href="{% url 'transfer_create' %}" class="btn btn-primary btn-sm">➕ Transfer</a>
+    </div>
+</div>
+
+<!-- Total -->
+<div class="total-bar">
+    <span class="total-label">Total Transferred</span>
+    <span class="total-value value-blue">৳{{ total|floatformat:2 }}</span>
+</div>
+
+<!-- Transfer List -->
+<div class="transaction-list">
+    {% for transfer in transfers %}
+    <div class="transaction-item">
+        <div class="transaction-icon">🔄</div>
+        <div class="transaction-info">
+            <div class="transaction-label">
+                {{ transfer.from_wallet.icon }} {{ transfer.from_wallet.name }} ➔ {{ transfer.to_wallet.icon }} {{ transfer.to_wallet.name }}
+            </div>
+            <div class="transaction-meta">{{ transfer.date }}{% if transfer.description %} · {{ transfer.description }}{% endif %}</div>
+        </div>
+        <div class="transaction-amount value-blue">৳{{ transfer.amount|floatformat:0 }}</div>
+        <div class="transaction-actions">
+            <a href="{% url 'transfer_delete' transfer.pk %}" class="btn btn-icon btn-icon-sm btn-ghost" title="Delete & Revert">🗑️</a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+        <span class="empty-icon">🔄</span>
+        <div class="empty-text">No transfers recorded yet. Tap + to make a transfer between wallets.</div>
+        <div style="margin-top: 12px;">
+            <a href="{% url 'transfer_create' %}" class="btn btn-primary btn-sm">Transfer Money</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- FAB -->
+<a href="{% url 'transfer_create' %}" class="btn btn-primary btn-fab" id="fab-transfer" title="Transfer Money">+</a>
+{% endblock %}

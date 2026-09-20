@@ -2,10 +2,14 @@
 {% block title %}Wallets — MoneyFlow{% endblock %}
 
 {% block content %}
-<div class="page-header">
+<div class="page-header flex-between" style="align-items: center;">
     <div>
         <h1 class="page-title">💼 Wallets</h1>
         <div class="page-subtitle">Manage your balance locations</div>
+    </div>
+    <div style="display: flex; gap: 8px;">
+        <a href="{% url 'transfer_list' %}" class="btn btn-ghost btn-sm" title="View Transfers">📜 History</a>
+        <a href="{% url 'transfer_create' %}" class="btn btn-primary btn-sm" title="Transfer Money">🔄 Transfer</a>
     </div>
 </div>
 

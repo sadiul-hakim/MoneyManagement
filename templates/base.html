@@ -63,6 +63,10 @@
         <span class="nav-icon">🏠</span>
         <span class="nav-label">Home</span>
       </a>
+      <a href="{% url 'wallet_list' %}" class="nav-item {% if 'wallet' in request.resolver_match.url_name or 'transfer' in request.resolver_match.url_name %}active{% endif %}" id="nav-wallets">
+        <span class="nav-icon">💼</span>
+        <span class="nav-label">Wallets</span>
+      </a>
       <a href="{% url 'income_list' %}" class="nav-item {% if 'income' in request.resolver_match.url_name %}active{% endif %}" id="nav-income">
         <span class="nav-icon">📥</span>
         <span class="nav-label">Income</span>
@@ -80,6 +84,7 @@
         <span class="nav-label">Borrow</span>
       </a>
     </nav>
+
 
     <script>
       // Auto-dismiss messages after 3 seconds

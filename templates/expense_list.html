@@ -19,9 +19,9 @@
 <div class="transaction-list">
     {% for expense in expenses %}
     <div class="transaction-item">
-        <div class="transaction-icon">📤</div>
+        <div class="transaction-icon">{{ expense.category.icon|default:'📤' }}</div>
         <div class="transaction-info">
-            <div class="transaction-label">{{ expense.get_category_display }}</div>
+            <div class="transaction-label">{{ expense.category.name }}</div>
             <div class="transaction-meta">{{ expense.date }} · {{ expense.wallet }}{% if expense.description %} · {{ expense.description }}{% endif %}</div>
         </div>
         <div class="transaction-amount expense">-৳{{ expense.amount|floatformat:0 }}</div>

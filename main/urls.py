@@ -31,4 +31,10 @@ urlpatterns = [
     path('borrowing/add/', views.borrowing_create, name='borrowing_create'),
     path('borrowing/<int:pk>/toggle/', views.borrowing_toggle_return, name='borrowing_toggle'),
     path('borrowing/<int:pk>/delete/', views.borrowing_delete, name='borrowing_delete'),
+
+    # Transfers
+    path('transfers/', views.transfer_list, name='transfer_list'),
+    path('transfers/add/', views.transfer_create, name='transfer_create'),
+    path('transfers/<int:pk>/delete/', views.transfer_delete, name='transfer_delete'),
 ]
+

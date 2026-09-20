@@ -19,9 +19,9 @@
 <div class="transaction-list">
     {% for income in incomes %}
     <div class="transaction-item">
-        <div class="transaction-icon">📥</div>
+        <div class="transaction-icon">{{ income.source.icon|default:'📥' }}</div>
         <div class="transaction-info">
-            <div class="transaction-label">{{ income.get_source_display }}</div>
+            <div class="transaction-label">{{ income.source.name }}</div>
             <div class="transaction-meta">{{ income.date }} · {{ income.wallet }}{% if income.description %} · {{ income.description }}{% endif %}</div>
         </div>
         <div class="transaction-amount income">+৳{{ income.amount|floatformat:0 }}</div>
