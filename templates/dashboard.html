@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}MoneyFlow — Dashboard{% endblock %}
+
+{% block content %}
+<!-- Hero Balance Card -->
+<div class="hero-card">
+    <div class="hero-label">Total Balance</div>
+    <div class="hero-amount">৳{{ total_balance|floatformat:2 }}</div>
+    <div class="wallet-chips" style="justify-content: center;">
+        {% for wallet in wallets %}
+        <a href="{% url 'wallet_list' %}" class="wallet-chip">
+            <span class="chip-icon">{{ wallet.icon }}</span>
+            <span>{{ wallet.name }}</span>
+            <span class="chip-amount">৳{{ wallet.balance|floatformat:0 }}</span>
+        </a>
+        {% empty %}
+        <a href="{% url 'wallet_list' %}" class="wallet-chip">
+            <span class="chip-icon">➕</span>
+            <span>Add a wallet</span>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="summary-grid">
+    <a href="{% url 'income_list' %}" class="summary-card">
+        <span class="card-icon">📥</span>
+        <span class="card-value value-green">৳{{ total_income|floatformat:0 }}</span>
+        <span class="card-label">Total Income</span>
+    </a>
+    <a href="{% url 'expense_list' %}" class="summary-card">
+        <span class="card-icon">📤</span>
+        <span class="card-value value-red">৳{{ total_expense|floatformat:0 }}</span>
+        <span class="card-label">Total Cost</span>
+    </a>
+    <a href="{% url 'lending_list' %}" class="summary-card">
+        <span class="card-icon">🤝</span>
+        <span class="card-value value-orange">৳{{ total_lent|floatformat:0 }}</span>
+        <span class="card-label">Total Lent</span>
+    </a>
+    <a href="{% url 'borrowing_list' %}" class="summary-card">
+        <span class="card-icon">🙏</span>
+        <span class="card-value value-purple">৳{{ total_borrowed|floatformat:0 }}</span>
+        <span class="card-label">Total Borrowed</span>
+    </a>
+</div>
+
+<!-- Income vs Expense Chart -->
+<div class="card card-sm">
+    <div class="section-title">
+        <span class="title-icon">📊</span> {{ current_month }}
+    </div>
+    <div class="mini-chart">
+        <div class="chart-row">
+            <span class="chart-label">Income</span>
+            <div class="chart-bar-track">
+                <div class="chart-bar-fill green" style="width: {{ income_pct }}%;"></div>
+            </div>
+            <span class="chart-amount value-green">৳{{ month_income|floatformat:0 }}</span>
+        </div>
+        <div class="chart-row">
+            <span class="chart-label">Expense</span>
+            <div class="chart-bar-track">
+                <div class="chart-bar-fill red" style="width: {{ expense_pct }}%;"></div>
+            </div>
+            <span class="chart-amount value-red">৳{{ month_expense|floatformat:0 }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Transactions -->
+<div class="section-title mt-lg">
+    <span class="title-icon">🕐</span> Recent Activity
+</div>
+
+<div class="transaction-list">
+    {% for item in recent_items %}
+    <div class="transaction-item">
+        <div class="transaction-icon">{{ item.icon }}</div>
+        <div class="transaction-info">
+            <div class="transaction-label">{{ item.label }}</div>
+            <div class="transaction-meta">{{ item.date }} · {{ item.wallet }}{% if item.description %} · {{ item.description }}{% endif %}</div>
+        </div>
+        <div class="transaction-amount {% if item.type == 'income' %}income{% else %}expense{% endif %}">
+            {% if item.type == 'income' %}+{% else %}-{% endif %}৳{{ item.amount|floatformat:0 }}
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+        <span class="empty-icon">📝</span>
+        <div class="empty-text">No transactions yet. Start by adding a wallet, then record income or expenses!</div>
+        <a href="{% url 'wallet_list' %}" class="btn btn-primary btn-sm">Setup Wallets</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

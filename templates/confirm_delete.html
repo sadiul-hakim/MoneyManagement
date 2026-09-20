@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} — MoneyFlow{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="delete-confirm">
+        <span class="delete-icon">⚠️</span>
+        <div class="delete-text">Are you sure you want to delete?</div>
+        <div class="delete-object">{{ object }}</div>
+        <div class="delete-actions">
+            <a href="{% url cancel_url %}" class="btn btn-ghost">Cancel</a>
+            <form method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

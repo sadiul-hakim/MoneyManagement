@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Add Income — MoneyFlow{% endblock %}
+
+{% block content %}
+<a href="{% url 'income_list' %}" class="back-link">← Back to Income</a>
+
+<div class="page-header">
+    <h1 class="page-title">{{ title }}</h1>
+</div>
+
+<form method="post" class="card">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="form-group">
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+        <ul class="form-errors-list">
+            {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-success btn-block">💰 Add Income</button>
+</form>
+{% endblock %}

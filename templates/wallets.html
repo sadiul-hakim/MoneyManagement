@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Wallets — MoneyFlow{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">💼 Wallets</h1>
+        <div class="page-subtitle">Manage your balance locations</div>
+    </div>
+</div>
+
+<!-- Total Balance -->
+<div class="total-bar">
+    <span class="total-label">Total Balance</span>
+    <span class="total-value value-blue">৳{{ total|floatformat:2 }}</span>
+</div>
+
+<!-- Wallet List -->
+{% for wallet in wallets %}
+<div class="card card-sm">
+    <div class="flex-between">
+        <div>
+            <div style="font-size: 1.3rem; margin-bottom: 4px;">{{ wallet.icon }}</div>
+            <div style="font-weight: 700; font-size: 1rem;">{{ wallet.name }}</div>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-size: 1.2rem; font-weight: 800; color: var(--accent-cyan);">৳{{ wallet.balance|floatformat:2 }}</div>
+            <div class="wallet-chip-actions mt-sm">
+                <a href="{% url 'wallet_edit' wallet.pk %}" class="chip-btn" title="Edit">✏️</a>
+                <a href="{% url 'wallet_delete' wallet.pk %}" class="chip-btn chip-btn-danger" title="Delete">🗑️</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% empty %}
+<div class="empty-state">
+    <span class="empty-icon">💼</span>
+    <div class="empty-text">No wallets yet. Add your first one below!</div>
+</div>
+{% endfor %}
+
+<!-- Add Wallet Form -->
+<div class="section-divider"></div>
+<div class="section-title">
+    <span class="title-icon">➕</span> Add New Wallet
+</div>
+
+<form method="post" class="card">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="form-group">
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+        <ul class="form-errors-list">
+            {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary btn-block">Add Wallet</button>
+</form>
+{% endblock %}

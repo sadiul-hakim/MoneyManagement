@@ -1,0 +1,98 @@
+{% load static %}
+{% load pwa %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="description" content="Personal Money Management — Track your income, expenses, lending and borrowing." />
+    <meta name="theme-color" content="#0f0f1a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>
+      {% block title %}
+        MoneyFlow
+      {% endblock %}
+    </title>
+    {% progressive_web_app_meta %}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'main/css/style.css' %}" />
+  </head>
+  <body>
+    <!-- Messages -->
+    {% if messages %}
+      <div class="messages-container" id="messages-container">
+        {% for message in messages %}
+          <div class="message message-{{ message.tags }}" onclick="this.remove()">
+            <span class="message-icon">
+              {% if message.tags == 'success' %}
+                ✅
+              {% elif message.tags == 'error' %}
+                ❌
+              {% elif message.tags == 'warning' %}
+                ⚠️
+              {% else %}
+                ℹ️
+              {% endif %}
+            </span>
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- Page Content -->
+    <main class="main-content">
+      {% if user.is_authenticated %}
+        <div style="display: flex; justify-content: flex-end; margin-bottom: var(--space-md);">
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-ghost btn-sm">Log out</button>
+          </form>
+        </div>
+      {% endif %}
+      {% block content %}
+      {% endblock %}
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" id="bottom-nav">
+      <a href="{% url 'dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" id="nav-dashboard">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Home</span>
+      </a>
+      <a href="{% url 'income_list' %}" class="nav-item {% if 'income' in request.resolver_match.url_name %}active{% endif %}" id="nav-income">
+        <span class="nav-icon">📥</span>
+        <span class="nav-label">Income</span>
+      </a>
+      <a href="{% url 'expense_list' %}" class="nav-item {% if 'expense' in request.resolver_match.url_name %}active{% endif %}" id="nav-expenses">
+        <span class="nav-icon">📤</span>
+        <span class="nav-label">Expenses</span>
+      </a>
+      <a href="{% url 'lending_list' %}" class="nav-item {% if 'lending' in request.resolver_match.url_name %}active{% endif %}" id="nav-lending">
+        <span class="nav-icon">🤝</span>
+        <span class="nav-label">Lend</span>
+      </a>
+      <a href="{% url 'borrowing_list' %}" class="nav-item {% if 'borrowing' in request.resolver_match.url_name %}active{% endif %}" id="nav-borrowing">
+        <span class="nav-icon">🙏</span>
+        <span class="nav-label">Borrow</span>
+      </a>
+    </nav>
+
+    <script>
+      // Auto-dismiss messages after 3 seconds
+      setTimeout(() => {
+        const container = document.getElementById('messages-container')
+        if (container) {
+          container.style.opacity = '0'
+          container.style.transform = 'translateY(-20px)'
+          setTimeout(() => container.remove(), 300)
+        }
+      }, 3000)
+    </script>
+    {% block extra_js %}
+    {% endblock %}
+  </body>
+</html>

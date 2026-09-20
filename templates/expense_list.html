@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Expenses — MoneyFlow{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">📤 Expenses</h1>
+        <div class="page-subtitle">Track your spending</div>
+    </div>
+</div>
+
+<!-- Total -->
+<div class="total-bar">
+    <span class="total-label">Total Expenses</span>
+    <span class="total-value value-red">৳{{ total|floatformat:2 }}</span>
+</div>
+
+<!-- Expense List -->
+<div class="transaction-list">
+    {% for expense in expenses %}
+    <div class="transaction-item">
+        <div class="transaction-icon">📤</div>
+        <div class="transaction-info">
+            <div class="transaction-label">{{ expense.get_category_display }}</div>
+            <div class="transaction-meta">{{ expense.date }} · {{ expense.wallet }}{% if expense.description %} · {{ expense.description }}{% endif %}</div>
+        </div>
+        <div class="transaction-amount expense">-৳{{ expense.amount|floatformat:0 }}</div>
+        <div class="transaction-actions">
+            <a href="{% url 'expense_delete' expense.pk %}" class="btn btn-icon btn-icon-sm btn-ghost" title="Delete">🗑️</a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+        <span class="empty-icon">📤</span>
+        <div class="empty-text">No expenses recorded yet. Tap + to add your first expense.</div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- FAB -->
+<a href="{% url 'expense_create' %}" class="btn btn-primary btn-fab" id="fab-expense" title="Add Expense">+</a>
+{% endblock %}

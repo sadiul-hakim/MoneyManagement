@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Borrowing — MoneyFlow{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">🙏 Borrowing</h1>
+        <div class="page-subtitle">Money you borrowed from others</div>
+    </div>
+</div>
+
+<!-- Total Pending -->
+<div class="total-bar">
+    <span class="total-label">Pending Return</span>
+    <span class="total-value value-purple">৳{{ total_pending|floatformat:2 }}</span>
+</div>
+
+<!-- Pending Section -->
+{% if pending %}
+<div class="section-title">
+    <span class="title-icon">⏳</span> Pending
+</div>
+{% for item in pending %}
+<div class="person-card">
+    <div class="person-card-header">
+        <div class="person-name">
+            <span>👤</span> {{ item.person_name }}
+        </div>
+        <div class="person-amount value-purple">৳{{ item.amount|floatformat:0 }}</div>
+    </div>
+    <div class="person-meta">
+        <span>📅 Borrowed: {{ item.date_borrowed }}</span>
+        {% if item.return_date %}<span>🔄 Due: {{ item.return_date }}</span>{% endif %}
+        <span>{{ item.wallet }}</span>
+        {% if item.notes %}<span>📝 {{ item.notes }}</span>{% endif %}
+    </div>
+    <div class="person-actions">
+        <form method="post" action="{% url 'borrowing_toggle' item.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success btn-sm">✅ Mark Returned</button>
+        </form>
+        <a href="{% url 'borrowing_delete' item.pk %}" class="btn btn-ghost btn-sm">🗑️</a>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+<!-- Returned Section -->
+{% if returned %}
+<div class="section-divider"></div>
+<div class="section-title">
+    <span class="title-icon">✅</span> Returned
+</div>
+{% for item in returned %}
+<div class="person-card" style="opacity: 0.6;">
+    <div class="person-card-header">
+        <div class="person-name">
+            <span>👤</span> {{ item.person_name }}
+            <span class="status-badge status-returned">Returned</span>
+        </div>
+        <div class="person-amount" style="color: var(--text-secondary);">৳{{ item.amount|floatformat:0 }}</div>
+    </div>
+    <div class="person-meta">
+        <span>📅 {{ item.date_borrowed }}</span>
+        {% if item.notes %}<span>📝 {{ item.notes }}</span>{% endif %}
+    </div>
+    <div class="person-actions">
+        <form method="post" action="{% url 'borrowing_toggle' item.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-ghost btn-sm">↩️ Undo</button>
+        </form>
+        <a href="{% url 'borrowing_delete' item.pk %}" class="btn btn-ghost btn-sm">🗑️</a>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if not pending and not returned %}
+<div class="empty-state">
+    <span class="empty-icon">🙏</span>
+    <div class="empty-text">No borrowing records. Tap + to record money you borrowed.</div>
+</div>
+{% endif %}
+
+<!-- FAB -->
+<a href="{% url 'borrowing_create' %}" class="btn btn-primary btn-fab" id="fab-borrowing" title="Borrow Money">+</a>
+{% endblock %}
