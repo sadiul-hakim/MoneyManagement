@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Add Income — MoneyFlow{% endblock %}
+{% block title %}{{ title }} — MoneyFlow{% endblock %}
 
 {% block content %}
 <a href="{% url 'income_list' %}" class="back-link">← Back to Income</a>
@@ -21,6 +21,6 @@
         {% endif %}
     </div>
     {% endfor %}
-    <button type="submit" class="btn btn-success btn-block">💰 Add Income</button>
+    <button type="submit" class="btn btn-success btn-block">{% if is_edit %}💾 Update Income{% else %}💰 Add Income{% endif %}</button>
 </form>
 {% endblock %}

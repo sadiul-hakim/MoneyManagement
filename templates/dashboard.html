@@ -48,8 +48,11 @@
 
 <!-- Income vs Expense Chart -->
 <div class="card card-sm">
-    <div class="section-title">
-        <span class="title-icon">📊</span> {{ current_month }}
+    <div class="flex-between mb-sm">
+        <div class="section-title" style="margin-bottom: 0;">
+            <span class="title-icon">📊</span> {{ current_month }}
+        </div>
+        <a href="{% url 'reports' %}" class="btn btn-ghost btn-sm" style="font-size: 0.75rem; padding: 4px 8px;">Full Report →</a>
     </div>
     <div class="mini-chart">
         <div class="chart-row">

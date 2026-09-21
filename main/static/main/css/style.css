@@ -1103,15 +1103,136 @@ select.form-input option {
 
 /* ── Utility ───────────────────────────────────────────── */
 .text-center { text-align: center; }
+.mt-xs { margin-top: var(--space-xs); }
 .mt-sm { margin-top: var(--space-sm); }
 .mt-md { margin-top: var(--space-md); }
 .mt-lg { margin-top: var(--space-lg); }
+.mb-xs { margin-bottom: var(--space-xs); }
 .mb-sm { margin-bottom: var(--space-sm); }
 .mb-md { margin-bottom: var(--space-md); }
+.mb-lg { margin-bottom: var(--space-lg); }
+.py-sm { padding-top: var(--space-sm); padding-bottom: var(--space-sm); }
+.font-bold { font-weight: 700; }
 .flex-between {
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+/* ── Active Chips & Badges ─────────────────────────────── */
+.wallet-chip.active-chip {
+    background: var(--bg-card);
+    border-color: var(--accent-blue);
+    color: var(--text-primary);
+    box-shadow: 0 0 12px var(--accent-blue-glow);
+    font-weight: 700;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.badge-success {
+    background: var(--accent-green-glow);
+    color: var(--accent-green);
+    border: 1px solid rgba(0, 214, 143, 0.3);
+}
+
+.badge-danger {
+    background: var(--accent-red-glow);
+    color: var(--accent-red);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.badge-subtle {
+    background: var(--bg-glass);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+}
+
+/* ── Report Cards & Breakdowns ─────────────────────────── */
+.report-month-card {
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.report-month-card:hover {
+    border-color: var(--border-card);
+    transform: translateY(-2px);
+}
+
+.month-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.report-month-links {
+    display: flex;
+    gap: var(--space-md);
+    font-size: 0.75rem;
+    padding-top: var(--space-xs);
+    border-top: 1px dashed var(--border-subtle);
+}
+
+.month-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    opacity: 0.85;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.month-link:hover {
+    opacity: 1;
+    transform: translateX(2px);
+}
+
+.distribution-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.distribution-item {
+    background: var(--bg-glass);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    transition: background 0.2s ease;
+}
+
+.distribution-item:hover {
+    background: var(--bg-card-hover);
+}
+
+.distribution-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: 0.85rem;
+}
+
+.dist-icon {
+    font-size: 1.1rem;
+}
+
+.distribution-value {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+}
+
+.dist-pct {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
 }
 
 /* ── Responsive (Tablet+) ─────────────────────────────── */
@@ -1127,5 +1248,11 @@ select.form-input option {
 
     .summary-grid {
         grid-template-columns: repeat(4, 1fr);
+    }
+
+    .breakdown-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-md);
     }
 }

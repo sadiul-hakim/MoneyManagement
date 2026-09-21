@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Add Expense — MoneyFlow{% endblock %}
+{% block title %}{{ title }} — MoneyFlow{% endblock %}
 
 {% block content %}
 <a href="{% url 'expense_list' %}" class="back-link">← Back to Expenses</a>
@@ -21,6 +21,6 @@
         {% endif %}
     </div>
     {% endfor %}
-    <button type="submit" class="btn btn-danger btn-block">💸 Add Expense</button>
+    <button type="submit" class="btn btn-danger btn-block">{% if is_edit %}💾 Update Expense{% else %}💸 Add Expense{% endif %}</button>
 </form>
 {% endblock %}

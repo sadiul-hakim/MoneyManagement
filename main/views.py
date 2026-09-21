@@ -1,8 +1,10 @@
+import calendar
+from collections import defaultdict
 from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Count
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 
@@ -211,6 +213,47 @@ def income_create(request):
 
 
 @login_required
+def income_edit(request, pk):
+    income = get_object_or_404(Income, pk=pk, wallet__user=request.user)
+    form = IncomeForm(instance=income)
+    form.fields['wallet'].queryset = Wallet.objects.filter(user=request.user)
+
+    if request.method == 'POST':
+        old_wallet = income.wallet
+        old_amount = income.amount
+        form = IncomeForm(request.POST, instance=income)
+        form.fields['wallet'].queryset = Wallet.objects.filter(user=request.user)
+        if form.is_valid():
+            with transaction.atomic():
+                updated_income = form.save(commit=False)
+                new_wallet = updated_income.wallet
+                new_amount = updated_income.amount
+
+                if old_wallet.pk == new_wallet.pk:
+                    w = Wallet.objects.select_for_update().get(pk=old_wallet.pk)
+                    w.balance = w.balance - old_amount + new_amount
+                    w.save()
+                else:
+                    w_old = Wallet.objects.select_for_update().get(pk=old_wallet.pk)
+                    w_new = Wallet.objects.select_for_update().get(pk=new_wallet.pk)
+                    w_old.balance -= old_amount
+                    w_new.balance += new_amount
+                    w_old.save()
+                    w_new.save()
+
+                updated_income.save()
+
+            messages.success(request, 'Income updated successfully!')
+            return redirect('income_list')
+
+    return render(request, 'income_form.html', {
+        'form': form,
+        'title': 'Edit Income',
+        'is_edit': True,
+    })
+
+
+@login_required
 def income_delete(request, pk):
     income = get_object_or_404(Income, pk=pk, wallet__user=request.user)
     if request.method == 'POST':
@@ -265,6 +308,47 @@ def expense_create(request):
     return render(request, 'expense_form.html', {
         'form': form,
         'title': 'Add Expense',
+    })
+
+
+@login_required
+def expense_edit(request, pk):
+    expense = get_object_or_404(Expense, pk=pk, wallet__user=request.user)
+    form = ExpenseForm(instance=expense)
+    form.fields['wallet'].queryset = Wallet.objects.filter(user=request.user)
+
+    if request.method == 'POST':
+        old_wallet = expense.wallet
+        old_amount = expense.amount
+        form = ExpenseForm(request.POST, instance=expense)
+        form.fields['wallet'].queryset = Wallet.objects.filter(user=request.user)
+        if form.is_valid():
+            with transaction.atomic():
+                updated_expense = form.save(commit=False)
+                new_wallet = updated_expense.wallet
+                new_amount = updated_expense.amount
+
+                if old_wallet.pk == new_wallet.pk:
+                    w = Wallet.objects.select_for_update().get(pk=old_wallet.pk)
+                    w.balance = w.balance + old_amount - new_amount
+                    w.save()
+                else:
+                    w_old = Wallet.objects.select_for_update().get(pk=old_wallet.pk)
+                    w_new = Wallet.objects.select_for_update().get(pk=new_wallet.pk)
+                    w_old.balance += old_amount
+                    w_new.balance -= new_amount
+                    w_old.save()
+                    w_new.save()
+
+                updated_expense.save()
+
+            messages.success(request, 'Expense updated successfully!')
+            return redirect('expense_list')
+
+    return render(request, 'expense_form.html', {
+        'form': form,
+        'title': 'Edit Expense',
+        'is_edit': True,
     })
 
 
@@ -488,4 +572,121 @@ def transfer_delete(request, pk):
         'cancel_url': 'transfer_list',
         'title': 'Delete Transfer',
     })
+
+
+# ── Reports & Analytics ────────────────────────────────────────────────
+
+@login_required
+def reports_view(request):
+    user = request.user
+    incomes_qs = Income.objects.filter(wallet__user=user).select_related('source')
+    expenses_qs = Expense.objects.filter(wallet__user=user).select_related('category')
+
+    # Get distinct years for filter
+    income_years = incomes_qs.dates('date', 'year', order='DESC')
+    expense_years = expenses_qs.dates('date', 'year', order='DESC')
+    available_years = sorted(list(set(
+        [d.year for d in income_years] + [d.year for d in expense_years]
+    )), reverse=True)
+
+    selected_year = request.GET.get('year', '').strip()
+    if selected_year and selected_year.isdigit():
+        selected_year = int(selected_year)
+        incomes_qs = incomes_qs.filter(date__year=selected_year)
+        expenses_qs = expenses_qs.filter(date__year=selected_year)
+    else:
+        selected_year = None
+
+    # Overall totals
+    total_income = incomes_qs.aggregate(total=Sum('amount'))['total'] or Decimal('0')
+    total_expense = expenses_qs.aggregate(total=Sum('amount'))['total'] or Decimal('0')
+    net_savings = total_income - total_expense
+    savings_rate = 0
+    if total_income > 0:
+        savings_rate = round(float((net_savings / total_income) * 100), 1)
+
+    # Monthly breakdown (YYYY-MM)
+    monthly_data = defaultdict(lambda: {'income': Decimal('0'), 'expense': Decimal('0')})
+    for inc in incomes_qs:
+        key = inc.date.strftime('%Y-%m')
+        monthly_data[key]['income'] += inc.amount
+
+    for exp in expenses_qs:
+        key = exp.date.strftime('%Y-%m')
+        monthly_data[key]['expense'] += exp.amount
+
+    monthly_list = []
+    for month_key in sorted(monthly_data.keys(), reverse=True):
+        m_inc = monthly_data[month_key]['income']
+        m_exp = monthly_data[month_key]['expense']
+        m_net = m_inc - m_exp
+        y, m = month_key.split('-')
+        month_name = calendar.month_name[int(m)]
+        month_label = f"{month_name} {y}"
+
+        max_val = max(m_inc, m_exp, Decimal('1'))
+        inc_pct = int((m_inc / max_val) * 100) if max_val > 0 else 0
+        exp_pct = int((m_exp / max_val) * 100) if max_val > 0 else 0
+
+        monthly_list.append({
+            'key': month_key,
+            'label': month_label,
+            'year': int(y),
+            'month': int(m),
+            'income': m_inc,
+            'expense': m_exp,
+            'net': m_net,
+            'income_pct': inc_pct,
+            'expense_pct': exp_pct,
+        })
+
+    # Total Income by Source
+    sources_summary = (
+        incomes_qs.values('source__name', 'source__icon')
+        .annotate(total=Sum('amount'), count=Count('id'))
+        .order_by('-total')
+    )
+    source_breakdown = []
+    for s in sources_summary:
+        s_total = s['total'] or Decimal('0')
+        pct = round(float((s_total / total_income) * 100), 1) if total_income > 0 else 0
+        source_breakdown.append({
+            'name': s['source__name'] or 'General',
+            'icon': s['source__icon'] or '📥',
+            'total': s_total,
+            'count': s['count'],
+            'percentage': pct,
+        })
+
+    # Total Cost by Category
+    categories_summary = (
+        expenses_qs.values('category__name', 'category__icon')
+        .annotate(total=Sum('amount'), count=Count('id'))
+        .order_by('-total')
+    )
+    category_breakdown = []
+    for c in categories_summary:
+        c_total = c['total'] or Decimal('0')
+        pct = round(float((c_total / total_expense) * 100), 1) if total_expense > 0 else 0
+        category_breakdown.append({
+            'name': c['category__name'] or 'General',
+            'icon': c['category__icon'] or '📤',
+            'total': c_total,
+            'count': c['count'],
+            'percentage': pct,
+        })
+
+    context = {
+        'available_years': available_years,
+        'selected_year': selected_year,
+        'total_income': total_income,
+        'total_expense': total_expense,
+        'net_savings': net_savings,
+        'savings_rate': savings_rate,
+        'monthly_list': monthly_list,
+        'source_breakdown': source_breakdown,
+        'category_breakdown': category_breakdown,
+    }
+    return render(request, 'reports.html', context)
+
 

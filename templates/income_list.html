@@ -26,6 +26,7 @@
         </div>
         <div class="transaction-amount income">+৳{{ income.amount|floatformat:0 }}</div>
         <div class="transaction-actions">
+            <a href="{% url 'income_edit' income.pk %}" class="btn btn-icon btn-icon-sm btn-ghost" title="Edit">✏️</a>
             <a href="{% url 'income_delete' income.pk %}" class="btn btn-icon btn-icon-sm btn-ghost" title="Delete">🗑️</a>
         </div>
     </div>

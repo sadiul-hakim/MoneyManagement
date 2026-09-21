@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% block title %}Reports & Analytics — MoneyFlow{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">📊 Reports & Analytics</h1>
+        <div class="page-subtitle">Income & expense patterns breakdown</div>
+    </div>
+</div>
+
+<!-- Year Filter Selector -->
+<div class="filter-section mb-lg">
+    <div class="wallet-chips" style="justify-content: flex-start; overflow-x: auto; padding-bottom: 4px;">
+        <a href="{% url 'reports' %}" class="wallet-chip {% if not selected_year %}active-chip{% endif %}">
+            <span class="chip-icon">🌐</span>
+            <span>All Time</span>
+        </a>
+        {% for yr in available_years %}
+        <a href="{% url 'reports' %}?year={{ yr }}" class="wallet-chip {% if selected_year == yr %}active-chip{% endif %}">
+            <span class="chip-icon">📅</span>
+            <span>{{ yr }}</span>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- KPI Summary Cards -->
+<div class="summary-grid">
+    <div class="summary-card">
+        <span class="card-icon">📥</span>
+        <span class="card-value value-green">৳{{ total_income|floatformat:0 }}</span>
+        <span class="card-label">Total Income</span>
+    </div>
+    <div class="summary-card">
+        <span class="card-icon">📤</span>
+        <span class="card-value value-red">৳{{ total_expense|floatformat:0 }}</span>
+        <span class="card-label">Total Cost</span>
+    </div>
+    <div class="summary-card">
+        <span class="card-icon">💰</span>
+        <span class="card-value {% if net_savings >= 0 %}value-green{% else %}value-red{% endif %}">
+            {% if net_savings >= 0 %}+{% endif %}৳{{ net_savings|floatformat:0 }}
+        </span>
+        <span class="card-label">Net Savings</span>
+    </div>
+    <div class="summary-card">
+        <span class="card-icon">📈</span>
+        <span class="card-value {% if savings_rate >= 0 %}value-blue{% else %}value-orange{% endif %}">{{ savings_rate }}%</span>
+        <span class="card-label">Savings Rate</span>
+    </div>
+</div>
+
+<!-- Monthly Breakdown Section -->
+<div class="section-title mt-lg">
+    <span class="title-icon">🗓️</span> Monthly Income vs Cost
+</div>
+
+<div class="card-list mb-lg">
+    {% for month in monthly_list %}
+    <div class="card card-sm mb-md report-month-card">
+        <div class="flex-between mb-sm">
+            <div>
+                <strong class="month-title">{{ month.label }}</strong>
+            </div>
+            <div>
+                {% if month.net >= 0 %}
+                <span class="badge badge-success">+৳{{ month.net|floatformat:0 }} saved</span>
+                {% else %}
+                <span class="badge badge-danger">৳{{ month.net|floatformat:0 }} deficit</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Visual Bar Comparison -->
+        <div class="mini-chart">
+            <div class="chart-row">
+                <span class="chart-label">Income</span>
+                <div class="chart-bar-track">
+                    <div class="chart-bar-fill green" style="width: {{ month.income_pct }}%;"></div>
+                </div>
+                <span class="chart-amount value-green">৳{{ month.income|floatformat:0 }}</span>
+            </div>
+            <div class="chart-row">
+                <span class="chart-label">Cost</span>
+                <div class="chart-bar-track">
+                    <div class="chart-bar-fill red" style="width: {{ month.expense_pct }}%;"></div>
+                </div>
+                <span class="chart-amount value-red">৳{{ month.expense|floatformat:0 }}</span>
+            </div>
+        </div>
+
+        <div class="report-month-links mt-sm">
+            <a href="{% url 'income_list' %}?month={{ month.month }}&year={{ month.year }}" class="month-link value-green">
+                <span>View Income (৳{{ month.income|floatformat:0 }})</span> →
+            </a>
+            <a href="{% url 'expense_list' %}?month={{ month.month }}&year={{ month.year }}" class="month-link value-red">
+                <span>View Expenses (৳{{ month.expense|floatformat:0 }})</span> →
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+        <span class="empty-icon">📊</span>
+        <div class="empty-text">No income or expense records found for this period.</div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Dual Breakdown Sections: Source & Category -->
+<div class="breakdown-section mt-lg">
+    <!-- Income by Source -->
+    <div class="card mb-lg">
+        <div class="section-title mb-md">
+            <span class="title-icon">📥</span> Income by Source {% if selected_year %}({{ selected_year }}){% else %}(Overall){% endif %}
+        </div>
+        
+        <div class="distribution-list">
+            {% for item in source_breakdown %}
+            <div class="distribution-item mb-md">
+                <div class="flex-between mb-xs">
+                    <div class="distribution-label">
+                        <span class="dist-icon">{{ item.icon }}</span>
+                        <strong>{{ item.name }}</strong>
+                        <span class="badge badge-subtle">{{ item.count }} tx</span>
+                    </div>
+                    <div class="distribution-value">
+                        <span class="value-green font-bold">৳{{ item.total|floatformat:0 }}</span>
+                        <span class="dist-pct">({{ item.percentage }}%)</span>
+                    </div>
+                </div>
+                <div class="chart-bar-track">
+                    <div class="chart-bar-fill green" style="width: {{ item.percentage }}%;"></div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state py-sm">
+                <div class="empty-text">No income recorded.</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Cost by Category -->
+    <div class="card mb-lg">
+        <div class="section-title mb-md">
+            <span class="title-icon">📤</span> Cost by Category {% if selected_year %}({{ selected_year }}){% else %}(Overall){% endif %}
+        </div>
+        
+        <div class="distribution-list">
+            {% for item in category_breakdown %}
+            <div class="distribution-item mb-md">
+                <div class="flex-between mb-xs">
+                    <div class="distribution-label">
+                        <span class="dist-icon">{{ item.icon }}</span>
+                        <strong>{{ item.name }}</strong>
+                        <span class="badge badge-subtle">{{ item.count }} tx</span>
+                    </div>
+                    <div class="distribution-value">
+                        <span class="value-red font-bold">৳{{ item.total|floatformat:0 }}</span>
+                        <span class="dist-pct">({{ item.percentage }}%)</span>
+                    </div>
+                </div>
+                <div class="chart-bar-track">
+                    <div class="chart-bar-fill red" style="width: {{ item.percentage }}%;"></div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state py-sm">
+                <div class="empty-text">No expenses recorded.</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

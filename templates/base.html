@@ -71,6 +71,9 @@
     <!-- Page Content -->
     <main class="main-content">
       <div class="top-bar">
+        {% if user.is_authenticated %}
+          <a href="{% url 'reports' %}" class="btn btn-ghost btn-sm" style="margin-right: auto;" title="Analytics & Reports">📊 Reports</a>
+        {% endif %}
         <button id="theme-toggle" class="theme-toggle-btn" type="button" onclick="toggleTheme()" title="Toggle Light/Dark Theme" aria-label="Toggle theme">
           <span id="theme-icon">🌙</span>
         </button>
@@ -103,6 +106,10 @@
       <a href="{% url 'expense_list' %}" class="nav-item {% if 'expense' in request.resolver_match.url_name %}active{% endif %}" id="nav-expenses">
         <span class="nav-icon">📤</span>
         <span class="nav-label">Expenses</span>
+      </a>
+      <a href="{% url 'reports' %}" class="nav-item {% if request.resolver_match.url_name == 'reports' %}active{% endif %}" id="nav-reports">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Reports</span>
       </a>
       <a href="{% url 'lending_list' %}" class="nav-item {% if 'lending' in request.resolver_match.url_name %}active{% endif %}" id="nav-lending">
         <span class="nav-icon">🤝</span>

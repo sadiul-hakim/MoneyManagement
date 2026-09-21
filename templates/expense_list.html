@@ -26,6 +26,7 @@
         </div>
         <div class="transaction-amount expense">-৳{{ expense.amount|floatformat:0 }}</div>
         <div class="transaction-actions">
+            <a href="{% url 'expense_edit' expense.pk %}" class="btn btn-icon btn-icon-sm btn-ghost" title="Edit">✏️</a>
             <a href="{% url 'expense_delete' expense.pk %}" class="btn btn-icon btn-icon-sm btn-ghost" title="Delete">🗑️</a>
         </div>
     </div>
