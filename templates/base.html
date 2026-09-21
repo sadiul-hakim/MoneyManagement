@@ -72,7 +72,10 @@
     <main class="main-content">
       <div class="top-bar">
         {% if user.is_authenticated %}
-          <a href="{% url 'reports' %}" class="btn btn-ghost btn-sm" style="margin-right: auto;" title="Analytics & Reports">📊 Reports</a>
+          <div style="display: flex; gap: var(--space-sm); margin-right: auto;">
+            <a href="{% url 'reports' %}" class="btn btn-ghost btn-sm" title="Analytics & Reports">📊 Reports</a>
+            <a href="{% url 'admin:index' %}" class="btn btn-ghost btn-sm" title="Django Admin Panel">⚙️ Admin</a>
+          </div>
         {% endif %}
         <button id="theme-toggle" class="theme-toggle-btn" type="button" onclick="toggleTheme()" title="Toggle Light/Dark Theme" aria-label="Toggle theme">
           <span id="theme-icon">🌙</span>
