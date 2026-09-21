@@ -15,7 +15,7 @@ django-pwa==2.0.1
 django-select2==8.4.8
 Jinja2==3.1.6
 MarkupSafe==3.0.3
-pillow==12.3.0
+pillow==10.4.0
 python-dateutil==2.9.0.post0
 python-nvd3==0.16.0
 python-slugify==8.0.4
