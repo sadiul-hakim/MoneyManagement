@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="static/img/logo.png" alt="MoneyFlow Logo" width="100" />
-  <h1>💸 MoneyFlow — Personal Money Management System</h1>
+  <img src="static/img/icon-512.jpg" alt="MoneyFlow Logo" width="100" />
+  <h1>MoneyFlow — Personal Money Management System</h1>
   <p><strong>Track your money, grow your savings, and master your cash flow with ease.</strong></p>
 </div>
 
