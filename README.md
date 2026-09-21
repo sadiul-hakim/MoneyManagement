@@ -1,4 +1,8 @@
-# 💸 MoneyFlow — Personal Money Management System
+<div align="center">
+  <img src="static/img/logo.png" alt="MoneyFlow Logo" width="100" />
+  <h1>💸 MoneyFlow — Personal Money Management System</h1>
+  <p><strong>Track your money, grow your savings, and master your cash flow with ease.</strong></p>
+</div>
 
 Welcome to **MoneyFlow** (MoneyManagement), a modern, intuitive, and mobile-first personal finance tracking web application built with **Django 6.1** and **Progressive Web App (PWA)** capabilities. Take full control of your daily financial life — from multiple wallet balances and cash flow categorization to peer-to-peer lending, borrowing, and inter-wallet transfers.
 
@@ -46,21 +50,6 @@ MoneyFlow features an enterprise-grade Django Admin panel enhanced with powerful
 * 📅 **Advanced Range Filters**: Drill down through date ranges and monetary amount filters using `django-admin-rangefilter`.
 * ⚡ **Quick Action Buttons**: Top-bar action buttons via `django-admin-action-buttons` for quick batch operations (e.g., batch-mark loans as returned).
 * 📥📤 **Import / Export Data**: Full spreadsheet (Excel, CSV, JSON) export and import capabilities for all financial records via `django-import-export` and `tablib`.
-
----
-
-## 🛠️ Technology Stack
-
-Derived directly from [`requirements.txt`](./requirements.txt):
-
-| Category | Technology / Package |
-| :--- | :--- |
-| **Backend & Framework** | `Django 6.1.1`, `asgiref`, `sqlparse`, `tzdata` |
-| **PWA & Mobile** | `django-pwa 2.0.1` |
-| **Admin & UI Enhancement** | `django-admin-interface`, `django-colorfield`, `django-select2`, `django-admin-action-buttons`, `django-admin-rangefilter` |
-| **Data Import/Export** | `django-import-export 4.4.1`, `tablib`, `diff-match-patch` |
-| **Charts & Metrics** | `django-admin-charts`, `admin_tools_stats`, `django-nvd3`, `python-nvd3` |
-| **Templating & Utilities** | `Jinja2`, `MarkupSafe`, `Pillow`, `python-dateutil`, `datetime-truncate`, `python-slugify` |
 
 ---
 
