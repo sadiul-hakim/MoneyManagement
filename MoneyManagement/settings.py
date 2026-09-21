@@ -24,12 +24,18 @@ INSTALLED_APPS = [
     'admin_interface',
     'colorfield',
     'pwa',
+    'django_nvd3',
+    'admin_tools_stats',
+    'django_select2',
+    'rangefilter',
+    'admin_action_buttons',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'import_export',
     'main',
 ]
 
@@ -66,6 +72,16 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    },
+    'select2': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+SELECT2_CACHE_BACKEND = 'select2'
 
 ROOT_URLCONF = 'MoneyManagement.urls'
 

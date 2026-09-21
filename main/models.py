@@ -80,7 +80,6 @@ class Expense(models.Model):
         return f"-{self.amount} ({self.category}) on {self.date}"
 
 
-
 class Lending(models.Model):
     """Money you lent to someone."""
     person_name = models.CharField(max_length=150)
@@ -134,4 +133,3 @@ class Transfer(models.Model):
 
     def __str__(self):
         return f"Transfer {self.amount} from {self.from_wallet.name} to {self.to_wallet.name} on {self.date}"
-
