@@ -10,6 +10,10 @@ from .models import (
     Transfer,
 )
 
+admin.site.site_header = "MoneyManagement"
+admin.site.site_title = "MoneyManagement"
+admin.site.index_title = "Welcome to MoneyManagement"
+
 
 @admin.register(IncomeSource)
 class IncomeSourceAdmin(admin.ModelAdmin):
@@ -40,21 +44,22 @@ class ExpenseAdmin(admin.ModelAdmin):
     list_filter = ['category', 'date']
 
 
-
 @admin.register(Lending)
 class LendingAdmin(admin.ModelAdmin):
-    list_display = ['person_name', 'amount', 'date_lent', 'return_date', 'is_returned']
+    list_display = ['person_name', 'amount',
+                    'date_lent', 'return_date', 'is_returned']
     list_filter = ['is_returned']
 
 
 @admin.register(Borrowing)
 class BorrowingAdmin(admin.ModelAdmin):
-    list_display = ['person_name', 'amount', 'date_borrowed', 'return_date', 'is_returned']
+    list_display = ['person_name', 'amount',
+                    'date_borrowed', 'return_date', 'is_returned']
     list_filter = ['is_returned']
 
 
 @admin.register(Transfer)
 class TransferAdmin(admin.ModelAdmin):
-    list_display = ['from_wallet', 'to_wallet', 'amount', 'date', 'description', 'created_at']
+    list_display = ['from_wallet', 'to_wallet',
+                    'amount', 'date', 'description', 'created_at']
     list_filter = ['date', 'from_wallet', 'to_wallet']
-
